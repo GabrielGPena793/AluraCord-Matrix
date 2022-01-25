@@ -1,39 +1,11 @@
 import appConfig from "../config.json";
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
+import { useRouter } from 'next/router';
+import React from "react";
 
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: "Open Sans", sans-serif;
-      }
-      /* App fit Height */
-      html,
-      body,
-      #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */
-    `}</style>
-  );
-}
 
 function Title(props) {
-  console.log(props);
+
   const Tag = props.tag || 'h1';
   return (
     <>
@@ -65,11 +37,13 @@ function Title(props) {
 // export default HomePage
 
 export default function PaginaInicial() {
-  const username = "gabrielgpena793";
+  const [ username, setUsername ] = React.useState('');
+  const [ inputText, setinputText ] = React.useState('');
+  const [ srcImg, setSrcImg ] = React.useState('https://i.pinimg.com/564x/6a/f4/9c/6af49c799d7dca197f60709e3a2599f8.jpg');
+  const roteamento = useRouter();
 
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: "flex",
@@ -104,6 +78,12 @@ export default function PaginaInicial() {
           {/* Formulário */}
           <Box
             as="form"
+            onSubmit={function (event){
+
+              event.preventDefault();
+              roteamento.push('/chat')
+
+            }}
             styleSheet={{
               display: "flex",
               flexDirection: "column",
@@ -124,8 +104,44 @@ export default function PaginaInicial() {
             >
               {appConfig.name}
             </Text>
-
+{/* 
+            <input type="text" 
+            value={username} 
+            onChange={function handler(event){
+              // onde está o valor ?
+              const valor = event.target.value;
+              // Trocar o valor da variável, através do react
+              setUsername(valor);
+              
+            }}/> */}
             <TextField
+              value={inputText} 
+              onChange={function handler(event){
+                // onde está o valor ?
+                const valor = event.target.value;
+                setinputText(valor);
+
+                fetch(`https://api.github.com/users/${valor}`)
+                .then(response => response.json())
+                .then( item => {
+
+                  // Trocar o valor da variável, através do react
+                  if(valor.length > 2){
+                    setUsername(item.login)
+
+                    if(item.avatar_url != ''){
+                      setSrcImg(item.avatar_url)
+                    }else{
+                      setSrcImg("https://i.pinimg.com/564x/6a/f4/9c/6af49c799d7dca197f60709e3a2599f8.jpg")
+                    }
+                    
+                  }else{
+                    setUsername("")
+                  }
+          
+                  
+                } )
+              }}
               fullWidth
               textFieldColors={{
                 neutral: {
@@ -171,7 +187,7 @@ export default function PaginaInicial() {
                 borderRadius: "50%",
                 marginBottom: "16px",
               }}
-              src={`https://github.com/${username}.png`}
+              src={srcImg} 
             />
             <Text
               variant="body4"
